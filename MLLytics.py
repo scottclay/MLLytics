@@ -12,7 +12,7 @@ class ClassMetrics():
         
         for thres in range(0,110,1):
             th = np.zeros(len(label))
-            th[(pred>(thres/100.))] = 1
+            th[(prob>(thres/100.))] = 1
 
             _tp = len(th[(label==1)&(th==1)])
             _tn = len(th[(label==0)&(th==0)])
