@@ -23,6 +23,7 @@ class ClassMetrics():
             _fpr = _fp / (_fp + _tn)
             _tnr = _tn / (_tn + _fp)
 
+			
             try:
                 _precision = _tp / (_tp + _fp)
             except:
@@ -45,4 +46,38 @@ class ClassMetrics():
         
         return [_youden_J, _youden_J_threshold]
         
+
+class MultiClassMetrics():
+
+    def __init__(self, prob,pred,label):
         
+        n_classes = len(prob.keys())
+        n_labels = len(np.unique(label))
+        n_pred = len(np.unique(pred))
+        
+        if n_classes == n_labels == n_pred:
+            print('GOOD TO GO')
+        
+        multi = {}
+        for i, j in enumerate(prob.keys()):
+
+            _label = label.copy()
+            _label[label==i] = 1
+            _label[label!=i] = 0
+            
+            _pred = pred.copy()
+            _pred[pred==i] = 1
+            _pred[pred!=i] = 0
+            
+            multi[j] = ClassMetrics(prob[j], _label)
+        
+        self.multi = multi
+
+            
+            
+        
+        
+
+        
+        		
+ 
