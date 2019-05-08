@@ -17,8 +17,14 @@ class ClassMetrics():
         self.tnr = np.empty(0)
         self.prec = np.empty(0)
         self.recall = np.empty(0)
+        self.acc = np.empty(0)
         
-        for thres in range(0,110,1):
+        self.tp = np.empty(0)
+        self.tn = np.empty(0)
+        self.fp = np.empty(0)
+        self.fn = np.empty(0)
+        
+        for thres in range(0,100,1):
             th = np.zeros(len(label))
             th[(prob>(thres/100.))] = 1
 
@@ -31,12 +37,12 @@ class ClassMetrics():
             _fpr = _fp / (_fp + _tn)
             _tnr = _tn / (_tn + _fp)
 
-			
             try:
                 _precision = _tp / (_tp + _fp)
             except:
                 _precision = 1
             _recall = _tp / (_tp + _fn)
+            _acc = (_tp + _tn)/len(label)
 
             self.threshold = np.append(self.threshold, (thres/100.))
             
@@ -44,8 +50,14 @@ class ClassMetrics():
             self.fpr = np.append(self.fpr, _fpr)
             self.tnr = np.append(self.tnr, _tnr)
             
+            self.tp = np.append(self.tp, _tp)
+            self.tn = np.append(self.tn, _tn)
+            self.fp = np.append(self.fp, _fp)
+            self.fn = np.append(self.fn, _fn)
+            
             self.prec = np.append(self.prec, _precision)
             self.recall = np.append(self.recall, _recall)
+            self.acc = np.append(self.acc, _acc)
         
     def calc_youden_J_statistic(self):
         _J = self.tpr + self.tnr - 1.
@@ -53,7 +65,36 @@ class ClassMetrics():
         _youden_J_threshold = self.threshold[_J.argmax()] 
         
         return [_youden_J, _youden_J_threshold]
+    
+    def give_threshold(self, given_threshold=0.5):
+        _arg = np.argwhere(self.threshold==0.5)
         
+              
+        _recall = np.asscalar(self.recall[_arg])
+        _precision = np.asscalar(self.prec[_arg])
+        _acc = np.asscalar(self.acc[_arg])
+        _tp = np.asscalar(self.tp[_arg])
+        _tn = np.asscalar(self.tn[_arg])
+        _fp = np.asscalar(self.fp[_arg])
+        _fn = np.asscalar(self.fn[_arg])
+        _tpr = np.asscalar(self.tpr[_arg])
+        _fpr = np.asscalar(self.fpr[_arg])
+        _tnr = np.asscalar(self.tnr[_arg])
+        
+        return {'threshold':given_threshold,
+                'recall':_recall ,
+                'precision':_precision,
+				'accuracy':_acc,
+                'TP':_tp,
+                'TN':_tn,
+                'FP':_fp,
+                'FN':_fn,
+                'TPR':_tpr,
+                'FPR':_fpr,
+                'TNR':_tnr
+        }
+        
+                
 
 class MultiClassMetrics():
 
@@ -80,7 +121,42 @@ class MultiClassMetrics():
             multi[j] = ClassMetrics(prob[j], _label)
         
         self.multi = multi
+        
+        
+        self.tp = len(pred[(label==1)&(pred==1)])
+        self.tn = len(pred[(label==0)&(pred==0)])
+        self.fp = len(pred[(label==0)&(pred==1)])
+        self.fn = len(pred[(label==1)&(pred==0)])
 
+        self.tpr = self.tp / (self.tp + self.fn)
+        self.fpr = self.fp / (self.fp + self.tn)
+        self.tnr = self.tn / (self.tn + self.fp)
+
+
+        try:
+            self.precision = self.tp / (self.tp + self.fp)
+        except:
+            self.precision = 1
+        
+        self.recall = self.tp / (self.tp + self.fn)
+        self.acc = (self.tp + self.tn)/len(pred)
+        
+        
+    def give_overview(self):
+        _arg = np.argwhere(self.threshold==0.5)
+        
+        
+        return {'recall':self.recall ,
+                'precision':self.precision,
+                'accuracy':self.acc,
+                'TP':self.tp,
+                'TN':self.tn,
+                'FP':self.fp,
+                'FN':self.fn,
+                'TPR':self.tpr,
+                'FPR':self.fpr,
+                'TNR':self.tnr
+        }
 def ftr_importance(cols, imps):
     d={}
     for i in range(0, len(cols)):
