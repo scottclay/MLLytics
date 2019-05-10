@@ -103,6 +103,7 @@ class MultiClassMetrics():
         n_classes = len(prob.keys())
         n_labels = len(np.unique(label))
         n_pred = len(np.unique(pred))
+        n_obs = len(pred)
         
         if n_classes == n_labels == n_pred:
             print('GOOD TO GO')
@@ -123,40 +124,90 @@ class MultiClassMetrics():
         self.multi = multi
         
         
-        self.tp = len(pred[(label==1)&(pred==1)])
-        self.tn = len(pred[(label==0)&(pred==0)])
-        self.fp = len(pred[(label==0)&(pred==1)])
-        self.fn = len(pred[(label==1)&(pred==0)])
+        
+        #num_class = len(results.multi.keys())
 
-        self.tpr = self.tp / (self.tp + self.fn)
-        self.fpr = self.fp / (self.fp + self.tn)
-        self.tnr = self.tn / (self.tn + self.fp)
+        count_uniques = np.bincount(pred)
+        ii = np.nonzero(count_uniques)[0]
+        class_counts = {}
+        for i in range(0,len(count_uniques)):
+            class_counts[str(ii[i])] = count_uniques[ii][i]
+        
+        self.precision = {'macroA':np.empty(0),
+                          'macroB':np.empty(0),
+                          'micro':np.empty(0)
+                         }
+        
+        self.recall    = {'macroA':np.empty(0),
+                          'macroB':np.empty(0),
+                          'micro':np.empty(0)
+                         }
+        
+        self.tpr = {'macroA':np.empty(0),
+                    'macroB':np.empty(0),
+                    'micro':np.empty(0)
+                    }
+        
+        self.fpr = {'macroA':np.empty(0),
+                    'macroB':np.empty(0),
+                    'micro':np.empty(0)
+                    }
+        
+        self.threshold = np.empty(0)
+        
+
+        for j in range(0,len(self.multi[list(self.multi.keys())[0]].threshold)):
+            
+            _prec_macroA = 0
+            _prec_macroB = 0
+            _recall_macroA = 0
+            _recall_macroB = 0
+            _tpr_macroA = 0
+            _tpr_macroB = 0
+            _fpr_macroA = 0
+            _fpr_macroB = 0
+            
+            _tp = 0
+            _fp = 0
+            _fn = 0
+            _tn = 0
+            
+            for i in self.multi.keys():
+                _prec_macroA += (self.multi[i].prec[j]/n_classes)
+                _recall_macroA += (self.multi[i].recall[j]/n_classes)
+                _tpr_macroA += (self.multi[i].tpr[j]/n_classes)
+                _fpr_macroA += (self.multi[i].fpr[j]/n_classes)                
+                
+                _prec_macroB += (self.multi[i].prec[j]*(class_counts[i]/n_obs))
+                _recall_macroB += (self.multi[i].recall[j]*(class_counts[i]/n_obs))                
+                _tpr_macroB += (self.multi[i].tpr[j]*(class_counts[i]/n_obs))   
+                _fpr_macroB += (self.multi[i].fpr[j]*(class_counts[i]/n_obs))                   
+                
+                _tp += (self.multi[i].tp[j])
+                _fp += (self.multi[i].fp[j])     
+                _fn += (self.multi[i].fn[j])
+                _tn += (self.multi[i].tn[j])
+            
+            self.threshold = np.append(self.threshold, self.multi['0'].threshold[j])
+            
+            self.precision['macroA'] = np.append(self.precision['macroA'], _prec_macroA)
+            self.recall['macroA'] = np.append(self.recall['macroA'], _recall_macroA)    
+            self.tpr['macroA'] = np.append(self.tpr['macroA'], _tpr_macroA)   
+            self.fpr['macroA'] = np.append(self.fpr['macroA'], _fpr_macroA)               
+            
+            self.precision['macroB'] = np.append(self.precision['macroB'], _prec_macroB)
+            self.recall['macroB'] = np.append(self.recall['macroB'], _recall_macroB)    
+            self.fpr['macroB'] = np.append(self.fpr['macroB'], _fpr_macroB)                   
+            
+            
+    
+    #need to fix NaNs here:
+            self.precision['micro']  = np.append(self.precision['micro'], _tp /(_tp + _fp))
+            self.recall['micro']  = np.append(self.recall['micro'], _tp /(_tp + _fn))  
+            self.fpr['micro'] = np.append(self.fpr['micro'], _fp/ (_fp + _tn))
+            self.tpr['micro'] = np.append(self.tpr['micro'], _tp /(_tp + _fn))       
 
 
-        try:
-            self.precision = self.tp / (self.tp + self.fp)
-        except:
-            self.precision = 1
-        
-        self.recall = self.tp / (self.tp + self.fn)
-        self.acc = (self.tp + self.tn)/len(pred)
-        
-        
-    def give_overview(self):
-        _arg = np.argwhere(self.threshold==0.5)
-        
-        
-        return {'recall':self.recall ,
-                'precision':self.precision,
-                'accuracy':self.acc,
-                'TP':self.tp,
-                'TN':self.tn,
-                'FP':self.fp,
-                'FN':self.fn,
-                'TPR':self.tpr,
-                'FPR':self.fpr,
-                'TNR':self.tnr
-        }
 def ftr_importance(cols, imps):
     d={}
     for i in range(0, len(cols)):
