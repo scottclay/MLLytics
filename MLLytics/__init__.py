@@ -181,7 +181,7 @@ class MultiClassMetrics():
                 _fpr_macroA += (self.multi[i].fpr[j]/self.n_classes)                
                 
                 _prec_macroB += (self.multi[i].prec[j]*(self.class_counts[i]/self.n_obs))
-                _recall_macroB += (self.multi[i].recall[j]*(self.class_counts[i]/self.n_obs))                
+                _recall_macroB += (self.multi[i].recall[j]*(self.class_counts[i]/self.n_obs))          				
                 _tpr_macroB += (self.multi[i].tpr[j]*(self.class_counts[i]/self.n_obs))   
                 _fpr_macroB += (self.multi[i].fpr[j]*(self.class_counts[i]/self.n_obs))                   
                 
@@ -199,6 +199,7 @@ class MultiClassMetrics():
             
             self.precision['macroB'] = np.append(self.precision['macroB'], _prec_macroB)
             self.recall['macroB'] = np.append(self.recall['macroB'], _recall_macroB)    
+            self.tpr['macroB'] = np.append(self.tpr['macroB'], _tpr_macroB)   
             self.fpr['macroB'] = np.append(self.fpr['macroB'], _fpr_macroB)                   
 
             
@@ -231,6 +232,14 @@ class MultiClassMetrics():
                 'TPR':_tpr,
                 'FPR':_fpr
         }
+		
+    def calc_youden_J_statistic(self, method='micro'):
+        _J = self.tpr[method] + self.tnr[method] - 1.
+        _youden_J = _J.max()
+        _youden_J_threshold = self.threshold[_J.argmax()] 
+        
+        return [_youden_J, _youden_J_threshold]
+
 
    
 

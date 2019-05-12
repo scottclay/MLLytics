@@ -7,7 +7,7 @@ from sklearn.metrics import confusion_matrix
 
 
 
-def plot_auc(fpr,tpr,threshold,youden=None):
+def plot_roc_auc(fpr,tpr,threshold,youden=None):
     import matplotlib.cm as cm
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     import seaborn as sns
@@ -78,12 +78,12 @@ def plot_rp(recall,prec,threshold):
     plt.gca().tick_params(axis='both', which='major', labelsize=15)
     plt.gca().tick_params(axis='both', which='minor', labelsize=15)
 
-    cbaxes = inset_axes(plt.gca(), width="3%", height="30%", loc= 'lower right',bbox_to_anchor=(-0.95, 0.05, 1, 1),
+    cbaxes = inset_axes(plt.gca(), width="30%", height="3%", loc= 'lower left',bbox_to_anchor=(0.05, 0.05, 1, 1),
                        bbox_transform=plt.gca().transAxes,
                        borderpad=0) 
-    plt.colorbar(cax=cbaxes, orientation='vertical')
+    plt.colorbar(cax=cbaxes, orientation='horizontal')
+    plt.text(0.33, 1.4, 'Threshold', fontsize=10)
     plt.show()
-
 
 
 
