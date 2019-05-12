@@ -24,7 +24,7 @@ class ClassMetrics():
         self.fp = np.empty(0)
         self.fn = np.empty(0)
         
-        for thres in range(0,100,1):
+        for thres in range(0,101,1):
             th = np.zeros(len(label))
             th[(prob>(thres/100.))] = 1
 
@@ -106,6 +106,14 @@ class MultiClassMetrics():
         self.n_obs = len(pred)
         self.accuracy = len(pred[pred==label])/len(pred)
         
+        
+        count_uniques = np.bincount(pred)
+        ii = np.nonzero(count_uniques)[0]
+        self.class_counts = {}
+        for i in range(0,len(count_uniques)):
+            self.class_counts[str(ii[i])] = count_uniques[ii][i]
+        
+        
         if self.n_classes == self.n_labels == self.n_pred:
             print('GOOD TO GO')
         
@@ -126,14 +134,7 @@ class MultiClassMetrics():
         self.micro_macro()
         
     def micro_macro(self):
-        #num_class = len(results.multi.keys())
 
-        count_uniques = np.bincount(pred)
-        ii = np.nonzero(count_uniques)[0]
-        class_counts = {}
-        for i in range(0,len(count_uniques)):
-            class_counts[str(ii[i])] = count_uniques[ii][i]
-        
         self.precision = {'macroA':np.empty(0),
                           'macroB':np.empty(0),
                           'micro':np.empty(0)
@@ -179,10 +180,10 @@ class MultiClassMetrics():
                 _tpr_macroA += (self.multi[i].tpr[j]/self.n_classes)
                 _fpr_macroA += (self.multi[i].fpr[j]/self.n_classes)                
                 
-                _prec_macroB += (self.multi[i].prec[j]*(class_counts[i]/self.n_obs))
-                _recall_macroB += (self.multi[i].recall[j]*(class_counts[i]/self.n_obs))                
-                _tpr_macroB += (self.multi[i].tpr[j]*(class_counts[i]/self.n_obs))   
-                _fpr_macroB += (self.multi[i].fpr[j]*(class_counts[i]/self.n_obs))                   
+                _prec_macroB += (self.multi[i].prec[j]*(self.class_counts[i]/self.n_obs))
+                _recall_macroB += (self.multi[i].recall[j]*(self.class_counts[i]/self.n_obs))                
+                _tpr_macroB += (self.multi[i].tpr[j]*(self.class_counts[i]/self.n_obs))   
+                _fpr_macroB += (self.multi[i].fpr[j]*(self.class_counts[i]/self.n_obs))                   
                 
                 _tp += (self.multi[i].tp[j])
                 _fp += (self.multi[i].fp[j])     
