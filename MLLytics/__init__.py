@@ -206,6 +206,7 @@ class MultiClassMetrics():
             self.recall['micro']  = np.append(self.recall['micro'], _tp /(_tp + _fn))  
             self.fpr['micro'] = np.append(self.fpr['micro'], _fp/ (_fp + _tn))
             self.tpr['micro'] = np.append(self.tpr['micro'], _tp /(_tp + _fn))       
+   
 
 
 def ftr_importance(cols, imps):
