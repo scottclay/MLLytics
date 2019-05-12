@@ -67,7 +67,7 @@ class ClassMetrics():
         return [_youden_J, _youden_J_threshold]
     
     def give_threshold(self, given_threshold=0.5):
-        _arg = np.argwhere(self.threshold==0.5)
+        _arg = np.argwhere(self.threshold==given_threshold)
         
               
         _recall = np.asscalar(self.recall[_arg])
@@ -100,12 +100,13 @@ class MultiClassMetrics():
 
     def __init__(self, prob,pred,label):
         
-        n_classes = len(prob.keys())
-        n_labels = len(np.unique(label))
-        n_pred = len(np.unique(pred))
-        n_obs = len(pred)
+        self.n_classes = len(prob.keys())
+        self.n_labels = len(np.unique(label))
+        self.n_pred = len(np.unique(pred))
+        self.n_obs = len(pred)
+        self.accuracy = len(pred[pred==label])/len(pred)
         
-        if n_classes == n_labels == n_pred:
+        if self.n_classes == self.n_labels == self.n_pred:
             print('GOOD TO GO')
         
         multi = {}
@@ -122,9 +123,9 @@ class MultiClassMetrics():
             multi[j] = ClassMetrics(prob[j], _label)
         
         self.multi = multi
+        self.micro_macro()
         
-        
-        
+    def micro_macro(self):
         #num_class = len(results.multi.keys())
 
         count_uniques = np.bincount(pred)
@@ -173,15 +174,15 @@ class MultiClassMetrics():
             _tn = 0
             
             for i in self.multi.keys():
-                _prec_macroA += (self.multi[i].prec[j]/n_classes)
-                _recall_macroA += (self.multi[i].recall[j]/n_classes)
-                _tpr_macroA += (self.multi[i].tpr[j]/n_classes)
-                _fpr_macroA += (self.multi[i].fpr[j]/n_classes)                
+                _prec_macroA += (self.multi[i].prec[j]/self.n_classes)
+                _recall_macroA += (self.multi[i].recall[j]/self.n_classes)
+                _tpr_macroA += (self.multi[i].tpr[j]/self.n_classes)
+                _fpr_macroA += (self.multi[i].fpr[j]/self.n_classes)                
                 
-                _prec_macroB += (self.multi[i].prec[j]*(class_counts[i]/n_obs))
-                _recall_macroB += (self.multi[i].recall[j]*(class_counts[i]/n_obs))                
-                _tpr_macroB += (self.multi[i].tpr[j]*(class_counts[i]/n_obs))   
-                _fpr_macroB += (self.multi[i].fpr[j]*(class_counts[i]/n_obs))                   
+                _prec_macroB += (self.multi[i].prec[j]*(class_counts[i]/self.n_obs))
+                _recall_macroB += (self.multi[i].recall[j]*(class_counts[i]/self.n_obs))                
+                _tpr_macroB += (self.multi[i].tpr[j]*(class_counts[i]/self.n_obs))   
+                _fpr_macroB += (self.multi[i].fpr[j]*(class_counts[i]/self.n_obs))                   
                 
                 _tp += (self.multi[i].tp[j])
                 _fp += (self.multi[i].fp[j])     
@@ -198,14 +199,38 @@ class MultiClassMetrics():
             self.precision['macroB'] = np.append(self.precision['macroB'], _prec_macroB)
             self.recall['macroB'] = np.append(self.recall['macroB'], _recall_macroB)    
             self.fpr['macroB'] = np.append(self.fpr['macroB'], _fpr_macroB)                   
+
             
+            if (_tp != 0) and (_fp != 0):
+                self.precision['micro']  = np.append(self.precision['micro'], _tp /(_tp + _fp))
+            else:
+                self.precision['micro'] = np.append(self.precision['micro'], 1.0)
             
-    
-    #need to fix NaNs here:
-            self.precision['micro']  = np.append(self.precision['micro'], _tp /(_tp + _fp))
             self.recall['micro']  = np.append(self.recall['micro'], _tp /(_tp + _fn))  
             self.fpr['micro'] = np.append(self.fpr['micro'], _fp/ (_fp + _tn))
             self.tpr['micro'] = np.append(self.tpr['micro'], _tp /(_tp + _fn))       
+
+    
+    def give_threshold(self, given_threshold=0.5, method='micro'):
+        _arg = np.argwhere(self.threshold==given_threshold)
+        
+        
+        _recall = np.asscalar(self.recall[method][_arg])
+        _precision = np.asscalar(self.precision[method][_arg])
+        _tpr = np.asscalar(self.tpr[method][_arg])
+        _fpr = np.asscalar(self.fpr[method][_arg])
+        
+        
+        _acc = self.accuracy
+        
+        return {'threshold':given_threshold,
+                'recall':_recall ,
+                'precision':_precision,
+                'accuracy':_acc,
+                'TPR':_tpr,
+                'FPR':_fpr
+        }
+
    
 
 
