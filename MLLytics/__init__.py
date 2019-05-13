@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 from sklearn.cluster import AffinityPropagation
 from collections import OrderedDict
-
+from matplotlib import cm
 
 class ClassMetrics():
 
@@ -312,8 +312,9 @@ def plot_cluster_corr(x, clus_corr):
     mask[np.triu_indices_from(mask)] = True
 
     f, ax = plt.subplots(figsize=(9, 7))
-    cmap = sns.diverging_palette(220, 10, as_cmap=True)
-
+    #cmap = sns.diverging_palette(20, 10, as_cmap=True)
+    cmap = cm.BuPu
+    
     sns.heatmap(corr, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=0., vmax=1.)
     ax.set_title('Clustered Correlation Matrix', fontsize=14)
 
@@ -333,10 +334,10 @@ def plot_cluster_corr(x, clus_corr):
         else:
             lt_a = lt_b = lt_c = lt_d = 2
        
-        ax.hlines(l,l,k, color='yellow', linewidth=lt_a)
-        ax.hlines(k,l,k, color='yellow', linewidth=lt_b)
-        ax.vlines(l,l,k, color='yellow', linewidth=lt_c)
-        ax.vlines(k,l,k, color='yellow', linewidth=lt_d)    
+        ax.hlines(l,l,k, color='k', linewidth=lt_a)
+        ax.hlines(k,l,k, color='k', linewidth=lt_b)
+        ax.vlines(l,l,k, color='k', linewidth=lt_c)
+        ax.vlines(k,l,k, color='k', linewidth=lt_d)    
 
 
 
