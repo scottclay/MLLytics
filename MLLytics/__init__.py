@@ -6,6 +6,7 @@ from sklearn.cluster import AffinityPropagation
 from collections import OrderedDict
 from matplotlib import cm
 
+
 class ClassMetrics():
 
     def __init__(self, prob,label, thres_bins=110):
@@ -240,10 +241,6 @@ class MultiClassMetrics():
         
         return [_youden_J, _youden_J_threshold]
 
-
-   
-
-
 def ftr_importance(cols, imps):
     d={}
     for i in range(0, len(cols)):
@@ -255,28 +252,6 @@ def ftr_importance(cols, imps):
     d_values.reverse()
     
     return d_keys, d_values
-
-def plot_ftr_importance(cols, imps, n=None):
-    
-    d_keys, d_values = ftr_importance(cols, imps)
-    
-    if n is not None:
-        d_keys = d_keys[:n]
-        d_values = d_values[:n]
-        
-    sns.set(style="whitegrid")
-
-    plt.figure(figsize=(9,6))
-    ax = sns.barplot(y=d_keys, x=d_values, orient = 'h',palette=("viridis"))
-
-    ax.set_title('Top 10 Features',fontsize=20)
-    ax.set_xlabel('Importance (%)', fontsize=18)
-
-    ax.tick_params(axis='both', which='major', labelsize=14)
-    #fig = plt.gcf()
-    #plt.xticks(rotation=90)
-
-
 
 def cluster_corr(corr):
     
@@ -302,62 +277,6 @@ def cluster_corr(corr):
     clus_corr = _corr.reindex(x.keys())[list(x.keys())]
     
     return x, clus_corr
-
-def plot_cluster_corr(x, clus_corr):
-    sns.set(style="white")
-    
-    corr = clus_corr
-    
-    mask = np.zeros_like(corr, dtype=np.bool)
-    mask[np.triu_indices_from(mask)] = True
-
-    f, ax = plt.subplots(figsize=(9, 7))
-    #cmap = sns.diverging_palette(20, 10, as_cmap=True)
-    cmap = cm.BuPu
-    
-    sns.heatmap(corr, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=0., vmax=1.)
-    ax.set_title('Clustered Correlation Matrix', fontsize=14)
-
-    j = 0
-    k = 0
-    for i in range(0,len(set(x.values()))):
-        z = sum(value == i for value in x.values())
-        k+=z
-        l=k-z
-     
-        if i == 0:
-            lt_a = lt_c = 3
-            lt_b = lt_d = 2
-        elif i == (len(set(x.values())) - 1):
-            lt_a = lt_c = 2
-            lt_b = lt_d = 5        
-        else:
-            lt_a = lt_b = lt_c = lt_d = 2
-       
-        ax.hlines(l,l,k, color='k', linewidth=lt_a)
-        ax.hlines(k,l,k, color='k', linewidth=lt_b)
-        ax.vlines(l,l,k, color='k', linewidth=lt_c)
-        ax.vlines(k,l,k, color='k', linewidth=lt_d)    
-
-
-
-def corr_matrix_triangle(_corr):
-    
-    ## corr matrix triangle
-    sns.set(style="white")
-    
-    # Generate a mask for the upper triangle
-    mask = np.zeros_like(_corr, dtype=np.bool)
-    mask[np.triu_indices_from(mask)] = True
-
-    # Set up the matplotlib figure
-    f, ax = plt.subplots(figsize=(9, 7)) 
-    
-    # Generate a custom diverging colormap
-    cmap = sns.diverging_palette(220, 10, as_cmap=True)
-    
-    sns.heatmap(_corr, mask=mask, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=-1., vmax=1.)
-    ax.set_title('Correlation Matrix', fontsize=14)            
         
 def corr_with_label(df, label):
     _df = df.select_dtypes(include=[np.number])
@@ -368,9 +287,33 @@ def corr_with_label(df, label):
     
     return _x
 
-def plot_corr_hist(corr):
-    plt.hist(np.array(list(a.values())), bins=10)
-    plt.xlim([-1,1])
         
-        		
- 
+def cluster_correlation_matrix(df: pd.DataFrame):
+    """
+    Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
+	You can calculate a correlation matrix by calling .corr(). 
+	You can calculate a correlation matrix for a spark dataframe by calling MLLytics.spark.spark_corr_matrix
+    :param df: Pandas dataframe of correlation matrix
+    :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
+    """
+    # Compute correlation matrix and taks abs value
+    corr: pd.DataFrame = spark_corr_matrix(df)
+    abs_corr = corr.abs()
+    
+    # Use AffinityPropagation to cluster data
+    affinity_prop = AffinityPropagation().fit(abs_corr)
+    abs_corr["cluster"] = affinity_prop.labels_
+    
+    # Extract columns and labels
+    cols = list(abs_corr.columns)
+    labels = list(affinity_prop.labels_)
+    
+    # Order the columns
+    order = {cols[i]: labels[i] for i in range(len(labels))}
+    order = OrderedDict(sorted(order.items(), key = lambda x: x[1]))
+    
+    # Reindex DataFrame
+    keys = list(order.keys())
+    clustered_corr = abs_corr.reindex(order.keys())[keys]
+    
+    return order, clustered_corr 

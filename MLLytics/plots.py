@@ -6,7 +6,6 @@ import itertools
 from sklearn.metrics import confusion_matrix
 
 
-
 def plot_roc_auc(fpr,tpr,threshold,youden=None):
     import matplotlib.cm as cm
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -29,7 +28,7 @@ def plot_roc_auc(fpr,tpr,threshold,youden=None):
     
     auc = auc(fpr,tpr)
     
-    props = dict(boxstyle='round', facecolor='white', alpha=0.9)
+    props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
     
     if youden is not None:
         plt.text(0.6,0.25,'AUC = '+str(auc)+'\nyouden_J_statistic = '+str(youden[0])+'\nthresehold = '+str(youden[1]), fontsize=12, bbox=props)
@@ -220,3 +219,82 @@ def plot_confusion_matrix(label, pred, label_names,
     plt.xlabel('Predicted label')
     plt.tight_layout()
     plt.show()
+	
+def corr_matrix_triangle(_corr):
+    
+    ## corr matrix triangle
+    sns.set(style="white")
+    
+    # Generate a mask for the upper triangle
+    mask = np.zeros_like(_corr, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Set up the matplotlib figure
+    f, ax = plt.subplots(figsize=(9, 7)) 
+    
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+    
+    sns.heatmap(_corr, mask=mask, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=-1., vmax=1.)
+    ax.set_title('Correlation Matrix', fontsize=14)            
+	
+def plot_corr_hist(corr):
+    plt.hist(np.array(list(a.values())), bins=10)
+    plt.xlim([-1,1])
+	
+def plot_cluster_corr(x, clus_corr):
+    sns.set(style="white")
+    
+    corr = clus_corr
+    
+    mask = np.zeros_like(corr, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    f, ax = plt.subplots(figsize=(9, 7))
+    #cmap = sns.diverging_palette(20, 10, as_cmap=True)
+    cmap = cm.BuPu
+    
+    sns.heatmap(corr, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=0., vmax=1.)
+    ax.set_title('Clustered Correlation Matrix', fontsize=14)
+
+    j = 0
+    k = 0
+    for i in range(0,len(set(x.values()))):
+        z = sum(value == i for value in x.values())
+        k+=z
+        l=k-z
+     
+        if i == 0:
+            lt_a = lt_c = 3
+            lt_b = lt_d = 2
+        elif i == (len(set(x.values())) - 1):
+            lt_a = lt_c = 2
+            lt_b = lt_d = 5        
+        else:
+            lt_a = lt_b = lt_c = lt_d = 2
+       
+        ax.hlines(l,l,k, color='k', linewidth=lt_a)
+        ax.hlines(k,l,k, color='k', linewidth=lt_b)
+        ax.vlines(l,l,k, color='k', linewidth=lt_c)
+        ax.vlines(k,l,k, color='k', linewidth=lt_d)    
+
+def plot_ftr_importance(cols, imps, n=None):
+    
+    d_keys, d_values = ftr_importance(cols, imps)
+    
+    if n is not None:
+        d_keys = d_keys[:n]
+        d_values = d_values[:n]
+        
+    sns.set(style="whitegrid")
+
+    plt.figure(figsize=(9,6))
+    ax = sns.barplot(y=d_keys, x=d_values, orient = 'h',palette=("viridis"))
+
+    ax.set_title('Top 10 Features',fontsize=20)
+    ax.set_xlabel('Importance (%)', fontsize=18)
+
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    #fig = plt.gcf()
+    #plt.xticks(rotation=90)
+	
