@@ -35,3 +35,7 @@ Upload package
 * Switch from my metrics to sklearn metrics where it makes sense? aka 
 ```fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])```
 and more general macro/micro average metrics from: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html#sklearn.metrics.recall_score
+
+## Contributing Authors
+* Scott Clay
+* David Sullivan

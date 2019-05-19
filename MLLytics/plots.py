@@ -5,6 +5,8 @@ import seaborn as sns
 import itertools
 from sklearn.metrics import confusion_matrix
 
+from MLLytics import cluster_correlation_matrix
+
 
 def plot_roc_auc(fpr,tpr,threshold,youden=None):
     import matplotlib.cm as cm
@@ -31,9 +33,9 @@ def plot_roc_auc(fpr,tpr,threshold,youden=None):
     props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
     
     if youden is not None:
-        plt.text(0.6,0.25,'AUC = '+str(auc)+'\nyouden_J_statistic = '+str(youden[0])+'\nthresehold = '+str(youden[1]), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(auc,2))+'\nyouden_J_statistic = '+str(round(youden[0],2))+'\nthresehold = '+str(round(youden[1],2), fontsize=12, bbox=props)
     else:
-        plt.text(0.6,0.25,'AUC = '+str(auc), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(auc,2), fontsize=12, bbox=props)
         
 
     
@@ -86,7 +88,7 @@ def plot_rp(recall,prec,threshold):
 
 
 
-def reliability_curve(y_true, y_score, bins=10, normalize=False):
+def reliability_curve(y_true, y_score, bins=25, normalize=False):
     """Compute reliability curve
 
     Reliability curves allow checking if the predicted probabilities of a
@@ -156,31 +158,37 @@ def reliability_curve(y_true, y_score, bins=10, normalize=False):
         empirical_prob_pos[i] = y_true[bin_idx].mean()
     return y_score_bin_mean, empirical_prob_pos
 
-def plot_rely(y_score_bin_mean, empirical_prob_pos):
-    plt.figure(0, figsize=(8, 8))
-    plt.subplot2grid((3, 1), (0, 0), rowspan=2)
-    plt.plot([0.0, 1.0], [0.0, 1.0], 'k', linestyle='--' , label="Perfect")
-    plt.plot(y_score_bin_mean, empirical_prob_pos, label='method')
+def plot_reliability_curve(prob, label, method='Model', bins=25):
+    
+    viridis = cm.viridis
 
-    #for method, (y_score_bin_mean, empirical_prob_pos) in reliability_scores.items():
-    #    scores_not_nan = np.logical_not(np.isnan(empirical_prob_pos))
-    #    plt.plot(y_score_bin_mean[scores_not_nan],
-    #             empirical_prob_pos[scores_not_nan], label=method)
-    plt.ylabel("Empirical probability")
+    prob_bin_mean, bin_positive_frac = reliability_curve(label, prob, bins=bins, normalize=False)
+
+    fig = plt.figure(0, figsize=(8, 8))
+    plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+    plt.plot([0.0, 1.0], [0.0, 1.0], color = 'k', label="Perfect", linestyle='--', zorder=0)
+
+    scores_not_nan = np.logical_not(np.isnan(bin_positive_frac))
+    plt.plot(prob_bin_mean[scores_not_nan],bin_positive_frac[scores_not_nan], label=method, color = viridis(0.0),zorder=1)
+    plt.scatter(prob_bin_mean[scores_not_nan],bin_positive_frac[scores_not_nan], color = viridis(0.45),edgecolors=viridis(0.0), zorder=2)
+    plt.ylabel("Fraction of Positives", fontsize=16)
     plt.legend(loc=0)
 
     plt.subplot2grid((3, 1), (2, 0))
-    plt.hist(empirical_prob_pos, range=(0, 1), bins=5, label='method',histtype="step", lw=2)
-    #for method, y_score_ in y_score.items():
-    #    y_score_ = (y_score_ - y_score_.min()) / (y_score_.max() - y_score_.min())
-    #    plt.hist(y_score_, range=(0, 1), bins=bins, label=method,
-    #             histtype="step", lw=2)
-    plt.xlabel("Predicted Probability")
-    plt.ylabel("Count")
-    #plt.legend(loc='upper center', ncol=2)
-    plt.show()
+    prob = (prob - prob.min()) / (prob.max() - prob.min())
+    plt.hist(prob, range=(0, 1), bins=bins, label=method,
+                 histtype="step", lw=2,color = viridis(0.0))
+    plt.xlabel("Predicted Probability", fontsize=16)
+    plt.ylabel("Bin Count", fontsize=16)
+
+    for ax in fig.get_axes():
+        ax.tick_params(axis='both', which='major', labelsize=12)
+        ax.tick_params(axis='both', which='minor', labelsize=12)
+
+
+    plt.legend(loc='upper center', ncol=2)
     
-def plot_confusion_matrix(label, pred, label_names,
+def plot_confusion_matrix(prob, label, label_names, threshold=0.5,
                           normalize=False,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues):
@@ -188,6 +196,8 @@ def plot_confusion_matrix(label, pred, label_names,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
+    pred = np.zeros(len(label))
+    pred[prob>threshold] = 1
     
     cm = confusion_matrix(label,pred)#,labels = [0,1,2])
     
@@ -200,13 +210,13 @@ def plot_confusion_matrix(label, pred, label_names,
 
     print(cm)
     sns.set_style("white")
-    
+#    plt.figure(figsize=(6,6))
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
+    plt.title(title, fontsize=16)
     plt.colorbar()
     tick_marks = np.arange(len(label_names))
-    plt.xticks(tick_marks, label_names, rotation=45)
-    plt.yticks(tick_marks, label_names)
+    plt.xticks(tick_marks, label_names, rotation=45, fontsize=12)
+    plt.yticks(tick_marks, label_names, fontsize=12)
 
     fmt = '.2f' if normalize else 'd'
     thresh = cm.max() / 2.
@@ -215,12 +225,12 @@ def plot_confusion_matrix(label, pred, label_names,
                  horizontalalignment="center",
                  color="white" if cm[i, j] > thresh else "black")
 
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+    plt.ylabel('True label', fontsize=14)
+    plt.xlabel('Predicted label', fontsize=14)
     plt.tight_layout()
     plt.show()
 	
-def corr_matrix_triangle(_corr):
+def plot_corr_matrix_triangle(_corr, cmap=cm.coolwarm):
     
     ## corr matrix triangle
     sns.set(style="white")
@@ -233,7 +243,8 @@ def corr_matrix_triangle(_corr):
     f, ax = plt.subplots(figsize=(9, 7)) 
     
     # Generate a custom diverging colormap
-    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+    #cmap = sns.diverging_palette(220, 10, as_cmap=True)
+    #cmap = cm.PiYG
     
     sns.heatmap(_corr, mask=mask, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=-1., vmax=1.)
     ax.set_title('Correlation Matrix', fontsize=14)            
@@ -242,7 +253,10 @@ def plot_corr_hist(corr):
     plt.hist(np.array(list(a.values())), bins=10)
     plt.xlim([-1,1])
 	
-def plot_cluster_corr(x, clus_corr):
+def plot_cluster_corr(df):
+    
+    x, clus_corr = cluster_correlation_matrix(df)
+    
     sns.set(style="white")
     
     corr = clus_corr

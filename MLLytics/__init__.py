@@ -288,7 +288,7 @@ def corr_with_label(df, label):
     return _x
 
         
-def cluster_correlation_matrix(df: pd.DataFrame):
+def cluster_correlation_matrix(corr: pd.DataFrame):
     """
     Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
 	You can calculate a correlation matrix by calling .corr(). 
@@ -297,7 +297,7 @@ def cluster_correlation_matrix(df: pd.DataFrame):
     :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
     """
     # Compute correlation matrix and taks abs value
-    corr: pd.DataFrame = spark_corr_matrix(df)
+    #corr: pd.DataFrame = spark_corr_matrix(df)
     abs_corr = corr.abs()
     
     # Use AffinityPropagation to cluster data
