@@ -6,6 +6,7 @@ import itertools
 from sklearn.metrics import confusion_matrix
 
 from MLLytics import cluster_correlation_matrix
+from matplotlib import cm
 
 
 def plot_roc_auc(fpr,tpr,threshold,youden=None):
@@ -33,9 +34,9 @@ def plot_roc_auc(fpr,tpr,threshold,youden=None):
     props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
     
     if youden is not None:
-        plt.text(0.6,0.25,'AUC = '+str(round(auc,2))+'\nyouden_J_statistic = '+str(round(youden[0],2))+'\nthresehold = '+str(round(youden[1],2), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(auc,2))+'\nyouden_J_statistic = '+str(round(youden[0],2))+'\nthresehold = '+str(round(youden[1],2)), fontsize=12, bbox=props)
     else:
-        plt.text(0.6,0.25,'AUC = '+str(round(auc,2), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(auc,2)), fontsize=12, bbox=props)
         
 
     
@@ -154,8 +155,14 @@ def reliability_curve(y_true, y_score, bins=25, normalize=False):
         bin_idx = np.logical_and(threshold - bin_width / 2 < y_score,
                                  y_score <= threshold + bin_width / 2)
         # Store mean y_score and mean empirical probability of positive class
-        y_score_bin_mean[i] = y_score[bin_idx].mean()
-        empirical_prob_pos[i] = y_true[bin_idx].mean()
+        
+        if len(y_score[bin_idx] > 0): #This suppresses warnings when calculating mean of empty arrays
+            y_score_bin_mean[i] = y_score[bin_idx].mean() 
+            empirical_prob_pos[i] = y_true[bin_idx].mean()
+        else:
+            y_score_bin_mean[i] = np.nan
+            empirical_prob_pos[i] = np.nan
+        
     return y_score_bin_mean, empirical_prob_pos
 
 def plot_reliability_curve(prob, label, method='Model', bins=25):
@@ -187,6 +194,7 @@ def plot_reliability_curve(prob, label, method='Model', bins=25):
 
 
     plt.legend(loc='upper center', ncol=2)
+
     
 def plot_confusion_matrix(prob, label, label_names, threshold=0.5,
                           normalize=False,
