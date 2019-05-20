@@ -24,9 +24,9 @@ Upload package
 * Tidy up legends and annotation text on plots
 * Joy plots
 * Brier score for calibration plot
+* Tidy up cross validation and plots (also repeated cross-validation)
 
 ### Big push
-* Cross Validation and plots (also repeated cross-validation)
 * Scoring functions
 * MultiClassMetrics class to inherit from ClassMetrics and share common functions
 * More output stats in overviews
