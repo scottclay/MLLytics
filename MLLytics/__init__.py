@@ -59,7 +59,9 @@ class ClassMetrics():
             self.prec = np.append(self.prec, _precision)
             self.recall = np.append(self.recall, _recall)
             self.acc = np.append(self.acc, _acc)
-        
+        self.tpr[0] = 1.0
+        self.fpr[0] = 1.0		
+	
     def calc_youden_J_statistic(self):
         _J = self.tpr + self.tnr - 1.
         _youden_J = _J.max()
@@ -317,3 +319,47 @@ def cluster_correlation_matrix(corr: pd.DataFrame):
     clustered_corr = abs_corr.reindex(order.keys())[keys]
     
     return order, clustered_corr 
+	
+from sklearn.metrics import auc
+
+        
+def cross_val(_df, label, model, k_folds=5):
+    cv_df = _df.sample(frac=1).copy()
+    cv_df['row_num'] = np.arange(len(_df))
+    
+    fold_size = len(_df)/k_folds
+    
+    out = []    
+    _acc = []
+    _auc = []
+    
+    for i in range(0,k_folds):
+        vals = np.arange(i*fold_size,(i*fold_size)+fold_size)
+        test_df = cv_df[cv_df['row_num'].isin(vals)]
+        train_df = cv_df[~cv_df['row_num'].isin(vals)]
+        
+        X_train = train_df.loc[:, train_df.columns != label]
+        X_test  = test_df.loc[:, test_df.columns != label]
+        y_train = train_df[[label]]
+        y_test = test_df[[label]]        
+
+        model.fit(X_train, y_train[label].ravel())
+        
+        _pred_proba = model.predict_proba(X_test)
+        _prob = np.array([_pred_proba[i][1] for i in range(0,len(_pred_proba))])
+        _label = y_test[label].ravel()
+        
+
+        _cl = ClassMetrics(_prob, _label)
+
+        _auc.append(auc(_cl.fpr,_cl.tpr))
+        _acc.append(model.score(X_test, y_test))
+        out.append(_cl)
+
+    print('The 5 AUC scores were: ', _auc)
+    print('The 5 ACC scores were: ', _acc)
+    
+    best_model = out[np.argmax(np.array(_auc))]
+    
+    return best_model, out	
+	
