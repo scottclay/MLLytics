@@ -6,6 +6,7 @@ from sklearn.cluster import AffinityPropagation
 from collections import OrderedDict
 from matplotlib import cm
 
+from sklearn.metrics import auc
 
 class ClassMetrics():
 
@@ -320,7 +321,6 @@ def cluster_correlation_matrix(corr: pd.DataFrame):
     
     return order, clustered_corr 
 	
-from sklearn.metrics import auc
 
         
 def cross_val(_df, label, model, k_folds=5):
@@ -332,6 +332,10 @@ def cross_val(_df, label, model, k_folds=5):
     out = []    
     _acc = []
     _auc = []
+
+
+    _prob_save = []
+    _label_save = []
     
     for i in range(0,k_folds):
         vals = np.arange(i*fold_size,(i*fold_size)+fold_size)
@@ -354,12 +358,21 @@ def cross_val(_df, label, model, k_folds=5):
 
         _auc.append(auc(_cl.fpr,_cl.tpr))
         _acc.append(model.score(X_test, y_test))
+        
+        _prob_save.append([_prob])
+        _label_save.append([_label])
+
+
         out.append(_cl)
 
     print('The 5 AUC scores were: ', _auc)
     print('The 5 ACC scores were: ', _acc)
     
-    best_model = out[np.argmax(np.array(_auc))]
+    print(_prob_save)
     
-    return best_model, out	
-	
+    best_model = {'model':out[np.argmax(np.array(_auc))],
+                  'prob':np.array(_prob_save[np.argmax(np.array(_auc))][0]),
+                  'label':np.array(_label_save[np.argmax(np.array(_auc))][0])
+                 }
+    
+    return best_model, out		
