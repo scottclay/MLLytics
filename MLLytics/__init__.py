@@ -368,7 +368,6 @@ def cross_val(_df, label, model, k_folds=5):
     print('The 5 AUC scores were: ', _auc)
     print('The 5 ACC scores were: ', _acc)
     
-    print(_prob_save)
     
     best_model = {'model':out[np.argmax(np.array(_auc))],
                   'prob':np.array(_prob_save[np.argmax(np.array(_auc))][0]),
