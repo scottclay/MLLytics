@@ -13,13 +13,16 @@ from sklearn.metrics import auc
 from scipy import interp
 
 
-
 def plot_roc_auc(fpr,tpr,threshold,youden=None):
-    import matplotlib.cm as cm
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    import seaborn as sns
-    from sklearn.metrics import auc
-    
+
+    """
+    Plot a roc_auc_curve
+    :param fpr: Array of FPRs 
+    :param fpr: Array of TPRs 
+    :param fpr: Array of Thresholds
+    :param youden: List (value, threshold)
+	
+    """
   
     sns.set_style("whitegrid")
     plt.figure(figsize=(7,7))
@@ -56,9 +59,14 @@ def plot_roc_auc(fpr,tpr,threshold,youden=None):
     plt.show()
 
 def plot_rp(recall,prec,threshold):
-    import matplotlib.cm as cm
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    import seaborn as sns
+
+    """
+    Plot a recall-precision curve
+    :param fpr: Array of recall values
+    :param fpr: Array of precision values
+    :param fpr: Array of thresholds
+    """
+
     sns.set_style("whitegrid")
     plt.figure(figsize=(7,7))
 
@@ -244,7 +252,12 @@ def plot_confusion_matrix(prob, label, label_names, threshold=0.5,
     plt.show()
 	
 def plot_corr_matrix_triangle(_corr, cmap=cm.coolwarm):
-    
+
+    """
+    Plot a traingular correlation matrix
+    :param _corr: Correlations from df.corr()
+    """
+
     ## corr matrix triangle
     sns.set(style="white")
     
@@ -262,11 +275,22 @@ def plot_corr_matrix_triangle(_corr, cmap=cm.coolwarm):
     sns.heatmap(_corr, mask=mask, cmap=cmap, square=True, cbar_kws={"shrink": .75}, vmin=-1., vmax=1.)
     ax.set_title('Correlation Matrix', fontsize=14)            
 	
-def plot_corr_hist(corr):
-    plt.hist(np.array(list(a.values())), bins=10)
-    plt.xlim([-1,1])
+#def plot_corr_hist(corr):
+#
+#    """
+#    Plot a histogram of correlation values
+#    :param corr: A list of ClassMetrics objects for different CV folds
+#    """
+#
+#    plt.hist(np.array(list(a.values())), bins=10)
+#    plt.xlim([-1,1])
 	
 def plot_cluster_corr(df):
+
+    """
+    Plot a clustered correlation matrix
+    :param df: Pandas dataframe 
+    """
     
     x, clus_corr = cluster_correlation_matrix(df)
     
@@ -329,10 +353,8 @@ def plot_ftr_importance(cols, imps, n=None):
 def plot_roc_auc_cv(folds: list):
     
     """
-    Computes clustered correlation matrix for a spark DataFrame
-    :param df: Spark DataFrame
-    :param kwargs: Additional arguments to pass to spark_corr_matrix
-    :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
+    Plot a ROC-AUC curve on many folds
+    :param folds: A list of ClassMetrics objects for different CV folds
     """
     
     sns.set_style("whitegrid")
@@ -391,10 +413,8 @@ def plot_roc_auc_cv(folds: list):
 def plot_recall_precision_cv(folds: list):
     
     """
-    Computes clustered correlation matrix for a spark DataFrame
-    :param df: Spark DataFrame
-    :param kwargs: Additional arguments to pass to spark_corr_matrix
-    :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
+    Plot a recall precision curve on many folds
+    :param folds: A list of ClassMetrics objects for different CV folds
     """
     
     sns.set_style("whitegrid")

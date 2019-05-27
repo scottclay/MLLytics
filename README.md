@@ -17,6 +17,7 @@ Upload package
 * Comment all functions and classes
 * Add type hinting to all functions and classes (https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html)
 * Example guides for each function in jupyter notebooks
+* MultiClassMetrics should inherit from ClassMetrics
 
 ### Cosmetic
 * Fix size of confusion matrix 
@@ -25,6 +26,9 @@ Upload package
 * Joy plots
 * Brier score for calibration plot
 * Tidy up cross validation and plots (also repeated cross-validation)
+* Acc-thresholds graph
+
+
 
 ### Big push
 * Scoring functions
@@ -35,6 +39,9 @@ Upload package
 * Switch from my metrics to sklearn metrics where it makes sense? aka 
 ```fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])```
 and more general macro/micro average metrics from: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html#sklearn.metrics.recall_score
+* Additional metrics (sensitivity, specificity, precision, negative predictive value, FPR, FNR, 
+false discovery rate, accuracy, F1 score
+
 
 ## Contributing Authors
 * Scott Clay
