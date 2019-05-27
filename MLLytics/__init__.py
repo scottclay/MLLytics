@@ -256,37 +256,44 @@ def ftr_importance(cols, imps):
     
     return d_keys, d_values
 
-def cluster_corr(corr):
-    
-    _corr = corr.abs()
-    
-    
-    _clustering = AffinityPropagation().fit(_corr)
-
-    _corr['cluster'] = _clustering.labels_
-    
-
-    _cols = list(_corr.columns)
-    _clus = list(_clustering.labels_)
-    
-
-    
-    order = {}
-    for i in range(0,len(_clus)): 
-        order[_cols[i]] = _clus[i]
+#def cluster_corr(corr): # No longer needed
+#    
+#    _corr = corr.abs()
+#    
+#    
+#    _clustering = AffinityPropagation().fit(_corr)
+#
+#    _corr['cluster'] = _clustering.labels_
+#    
+#    _cols = list(_corr.columns)
+#    _clus = list(_clustering.labels_)
+       
+#    order = {}
+#    for i in range(0,len(_clus)): 
+#        order[_cols[i]] = _clus[i]
         
-
-    x = OrderedDict(sorted(order.items(), key=lambda x: x[1]))
-    clus_corr = _corr.reindex(x.keys())[list(x.keys())]
+#    x = OrderedDict(sorted(order.items(), key=lambda x: x[1]))
+#    clus_corr = _corr.reindex(x.keys())[list(x.keys())]
     
-    return x, clus_corr
+#    return x, clus_corr
         
-def corr_with_label(df, label):
+def corr_with_label(df, label, method='pearson'):
+
+    """
+    Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
+	You can calculate a correlation matrix by calling .corr(). 
+	You can calculate a correlation matrix for a spark dataframe by calling MLLytics.spark.spark_corr_matrix
+    :param df: Pandas dataframe of all columns you wish to compare with the label
+	:param label: Column to compare correlations with
+	:param method: Correlation technique to pass to pd.corr()
+    :return: Dictionary of column names and correlation values
+    """
+
     _df = df.select_dtypes(include=[np.number])
     _x = {}
     for col in _df.columns:
-        print(col, _df[col].corr(_df[label]))
-        _x[col] = (_df[col].corr(_df[label]))
+        print(col, _df[col].corr(_df[label], method=method))
+        _x[col] = (_df[col].corr(_df[label], method=method))
     
     return _x
 
@@ -296,6 +303,7 @@ def cluster_correlation_matrix(corr: pd.DataFrame):
     Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
 	You can calculate a correlation matrix by calling .corr(). 
 	You can calculate a correlation matrix for a spark dataframe by calling MLLytics.spark.spark_corr_matrix
+	
     :param df: Pandas dataframe of correlation matrix
     :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
     """
@@ -324,6 +332,21 @@ def cluster_correlation_matrix(corr: pd.DataFrame):
 
         
 def cross_val(_df, label, model, k_folds=5):
+
+    """
+    _df is a pandas dataframe of your predictive and target variables (i.e. both X and y). This 
+	function then splits that dataframe into k_folds, training/testing on a given model. It returns 
+	a tuple of the best fit model as a ClassMetrics object, and a list for all individual folds of 
+	ClassMetrics objects.
+	
+    :param _df: Pandas dataframe of all data (X and y)
+	:param label: Label of column to predict
+	:param model: Given scikit-learn model
+	:param k_folds: Number of folds to cross validate on. 
+    :return: Tuple containing ClassMetrics object of first the best fit model, and then a list of objects for each fold. 
+    """
+
+
     cv_df = _df.sample(frac=1).copy()
     cv_df['row_num'] = np.arange(len(_df))
     
