@@ -37,14 +37,14 @@ def plot_roc_auc(fpr,tpr,threshold,youden=None):
     plt.xlabel("FPR", fontsize=16)
     plt.ylabel("TPR", fontsize=16)
     
-    auc = auc(fpr,tpr)
+    get_auc = auc(fpr,tpr)
     
     props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
     
     if youden is not None:
-        plt.text(0.6,0.25,'AUC = '+str(round(auc,2))+'\nyouden_J_statistic = '+str(round(youden[0],2))+'\nthresehold = '+str(round(youden[1],2)), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(get_auc,2))+'\nyouden_J_statistic = '+str(round(youden[0],2))+'\nthresehold = '+str(round(youden[1],2)), fontsize=12, bbox=props)
     else:
-        plt.text(0.6,0.25,'AUC = '+str(round(auc,2)), fontsize=12, bbox=props)
+        plt.text(0.6,0.25,'AUC = '+str(round(get_auc,2)), fontsize=12, bbox=props)
         
 
     
@@ -350,7 +350,7 @@ def plot_ftr_importance(cols, imps, n=None):
     #plt.xticks(rotation=90)
 	
 
-def plot_roc_auc_cv(folds: list):
+def plot_roc_auc_cv(folds: list, label='Fold', plot_averages = True):
     
     """
     Plot a ROC-AUC curve on many folds
@@ -389,28 +389,31 @@ def plot_roc_auc_cv(folds: list):
     #print(_auc)
     mean_auc = np.mean(np.array(_auc))
     std_auc = np.std(np.array(_auc))
+	
+	
     
     for i in range(0,k):
 
         plt.plot(folds[i].fpr,folds[i].tpr, zorder=1, linestyle='-',
-                label=r'Fold %d : AUC = %0.2f'%(i,_auc[i]))
+                label=label+r' %d : AUC = %0.2f'%(i,_auc[i]))
     
-    plt.plot(mean_fpr, mean_tpr, color='k', linewidth=2, label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc))
-    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
-                 label=r'$\pm$ 1 std. dev.')
+    if plot_averages == True:
+	    plt.plot(mean_fpr, mean_tpr, color='k', linewidth=2, label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc))
+	    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+			label=r'$\pm$ 1 std. dev.')
+				 
+				 
+				 
     
     plt.legend(fontsize = 12)
     
     plt.gca().tick_params(axis='both', which='major', labelsize=14)
     plt.gca().tick_params(axis='both', which='minor', labelsize=14)
     
-    
-        #plt.scatter(folds[i].fpr,folds[i].tpr, cmap = cm.viridis, edgecolors='k',
-        #            linewidth=1.5, marker='o',linestyle='-',zorder=2 )
 
 
 
-def plot_recall_precision_cv(folds: list):
+def plot_recall_precision_cv(folds: list, label='Fold', plot_averages = True):
     
     """
     Plot a recall precision curve on many folds
@@ -450,12 +453,12 @@ def plot_recall_precision_cv(folds: list):
     #std_auc = np.std(np.array(_auc))
     
     for i in range(0,k):
-
-        plt.plot(folds[i].recall,folds[i].prec, zorder=1, linestyle='-')#,label=r'AUC = %0.2f'%(_auc[i]))
+        plt.plot(folds[i].recall,folds[i].prec, zorder=1, linestyle='-',label=label+r' %d'%(i))
     
-    plt.plot(mean_recalls, mean_prec, color='k',label=r'Mean', linewidth=2)
-    plt.fill_between(mean_recalls, prec_lower, prec_upper, color='grey', alpha=.2,
-                 label=r'$\pm$ 1 std. dev.')
+    if plot_averages == True:
+	    plt.plot(mean_recalls, mean_prec, color='k',label=r'Mean', linewidth=2)
+	    plt.fill_between(mean_recalls, prec_lower, prec_upper, color='grey', alpha=.2,
+			label=r'$\pm$ 1 std. dev.')
     
     plt.legend(fontsize=14)
     
