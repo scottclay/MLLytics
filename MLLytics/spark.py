@@ -23,3 +23,34 @@ def spark_corr_matrix(df: DataFrame, method: str="pearson", dropna: bool=True) -
     
     return corr_df
 	
+import operator
+import random
+def balance_classes(_df, label):
+    num_classes = _df.groupBy(label).agg(F.countDistinct(label)).count()
+    
+    counts = {}
+    for i in range(0,num_classes):
+        counts[i] = _df.filter(F.col(label)==i).count()
+
+    min_class = min(counts.items(), key=operator.itemgetter(1))[0]
+    min_count = counts[min_class]
+    
+    df_size = _df.count()
+    
+    # create a monotonically increasing id 
+    _df = _df.withColumn("idx", F.monotonically_increasing_id())
+    
+    u = []
+    
+    for i in range(0,4):
+        uniques = _df.filter(F.col(label)==i).select('idx').distinct().collect()
+        vals = [uniques[i][0] for i in range(len(uniques))]
+        random.shuffle(vals)
+        _u = vals[:min_count]
+        u+=_u
+    
+    _df = _df.where(F.col("idx").isin(u))
+    _df = _df.drop('idx')
+    
+    return _df
+    
