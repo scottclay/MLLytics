@@ -42,7 +42,7 @@ def balance_classes(_df, label):
     
     u = []
     
-    for i in range(0,4):
+    for i in range(0,num_classes):
         uniques = _df.filter(F.col(label)==i).select('idx').distinct().collect()
         vals = [uniques[i][0] for i in range(len(uniques))]
         random.shuffle(vals)
