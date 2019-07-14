@@ -4,6 +4,8 @@
 ```pip install MLLytics```
 or
 ```python setup.py install```
+or
+``` conda env create -f environment.yml```
 
 ## Update pypi instructions (for me)
 Creates the package
