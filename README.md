@@ -1,6 +1,6 @@
 # MLLytics
 
-## Installation instructions 
+## Installation instructions
 ```pip install MLLytics```
 or
 ```python setup.py install```
@@ -19,10 +19,11 @@ Upload package
 * Comment all functions and classes
 * Add type hinting to all functions and classes (https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html)
 * Example guides for each function in jupyter notebooks
-* MultiClassMetrics should inherit from ClassMetrics
+* ~MultiClassMetrics should inherit from ClassMetrics~
+* REGRESSION
 
 ### Cosmetic
-* Fix size of confusion matrix 
+* Fix size of confusion matrix
 * Check works with matplotlib 3
 * Tidy up legends and annotation text on plots
 * Joy plots
@@ -38,10 +39,10 @@ Upload package
 * More output stats in overviews
 * Update reliability plot https://machinelearningmastery.com/calibrated-classification-model-in-scikit-learn/
 * Tests
-* Switch from my metrics to sklearn metrics where it makes sense? aka 
+* Switch from my metrics to sklearn metrics where it makes sense? aka
 ```fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])```
 and more general macro/micro average metrics from: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html#sklearn.metrics.recall_score
-* Additional metrics (sensitivity, specificity, precision, negative predictive value, FPR, FNR, 
+* Additional metrics (sensitivity, specificity, precision, negative predictive value, FPR, FNR,
 false discovery rate, accuracy, F1 score
 
 
