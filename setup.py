@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '0.1.14'
+VERSION = '0.1.15'
 
 CLASSIFIERS = ['Intended Audience :: Science/Research',
 			   'Intended Audience :: Developers',

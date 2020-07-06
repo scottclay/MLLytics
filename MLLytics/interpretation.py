@@ -1,56 +1,81 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-from pyspark.sql import DataFrame
-from pyspark.mllib.stat import Statistics
+import seaborn as sns
 
-def spark_corr_matrix(df: DataFrame, method: str="pearson", dropna: bool=True) -> pd.DataFrame:
+def make_pdp(df, feature, model, type='classification'):
+
     """
-    Computes correlation matrix between all columns in a spark DataFrame
-    :param df: Spark DataFrame
-    :param method: Correlation method (default pearson correlation)
-    :param dropna: Drop nans before calculating correlations
-    :return: Correlation matirx as a pandas DataFrame
+    Computes partial dependency plot values for a given feature.
+    :param df: pandas dataframe
+    :param feature: string
+    :param model: sci-kit learn model instance
+    :param type: string. classification or regression
     """
-    if dropna:
-        df = df.na.drop()
 
-    col_names = df.columns
-    features = df.rdd.map(lambda row: row[0:])
-    
-    corr_mat = Statistics.corr(features, method=method)
-    corr_df = pd.DataFrame(corr_mat)
-    
-    corr_df.index, corr_df.columns = col_names, col_names
-    
-    return corr_df
-	
-import operator
-import random
-def balance_classes(_df, label):
-    num_classes = _df.groupBy(label).agg(F.countDistinct(label)).count()
-    
-    counts = {}
-    for i in range(0,num_classes):
-        counts[i] = _df.filter(F.col(label)==i).count()
+    min_val = df[feature].min()
+    max_val = df[feature].max()
 
-    min_class = min(counts.items(), key=operator.itemgetter(1))[0]
-    min_count = counts[min_class]
-    
-    df_size = _df.count()
-    
-    # create a monotonically increasing id 
-    _df = _df.withColumn("idx", F.monotonically_increasing_id())
-    
-    u = []
-    
-    for i in range(0,num_classes):
-        uniques = _df.filter(F.col(label)==i).select('idx').distinct().collect()
-        vals = [uniques[i][0] for i in range(len(uniques))]
-        random.shuffle(vals)
-        _u = vals[:min_count]
-        u+=_u
-    
-    _df = _df.where(F.col("idx").isin(u))
-    _df = _df.drop('idx')
-    
-    return _df
-    
+    values = np.arange(min_val, max_val, (max_val - min_val)* 0.01)
+
+    li = []
+    va = []
+
+    if type=='classification':
+        for i in values:
+            _df = df.copy()
+            _df[feature].values[:] = i
+
+            output = model.predict_proba(_df)[:, 1]
+
+            vote_1 = len(output[output >= 0.5])
+            vote_2 = len(output[output < 0.5])
+
+            output = np.log(vote_1) - 0.5*(np.log(vote_1) + np.log(vote_2))
+
+            avg_output = output.mean()
+
+            li.append(avg_output)
+            va.append(i)
+
+    elif type=='regression':
+        for i in values:
+            _df = df.copy()
+            _df[feature].values[:] = i
+
+            output = model.predict(_df)
+
+            avg_output = output.mean()
+
+            li.append(avg_output)
+            va.append(i)
+
+    return va, li
+
+
+def plot_pdp(feature, va, li, type='classification'):
+
+    """
+    Plot a partial dependency plot
+    :param feature: string
+    :param va: array
+    :param li: array
+    :param type: string
+    """
+    sns.set_style("whitegrid")
+
+    fig = plt.figure(figsize=(7,7))
+
+    plt.plot(va,li,c='k', zorder=1, linestyle='-' )
+    if type=='classification':
+        plt.plot([min(va), max(va)],[0.,0.], linestyle='--')
+    plt.ylabel("Partial Dependence", fontsize=16)
+    plt.xlabel(feature, fontsize=16)
+
+    props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
+
+    plt.gca().tick_params(axis='both', which='major', labelsize=15)
+    plt.gca().tick_params(axis='both', which='minor', labelsize=15)
+
+    plt.title("Partial Dependency Plot", fontsize=18)
+    plt.show()
