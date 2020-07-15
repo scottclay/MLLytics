@@ -3,7 +3,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-def make_pdp(df, feature, model, type='classification'):
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+def make_pdp(df, feature, model, type='classification', quantiles=[0.05, 0.95]):
 
     """
     Computes partial dependency plot values for a given feature.
@@ -11,12 +16,17 @@ def make_pdp(df, feature, model, type='classification'):
     :param feature: string
     :param model: sci-kit learn model instance
     :param type: string. classification or regression
+    :param quantiles: list. min max quantiles to use to exclude extreme values
     """
 
-    min_val = df[feature].min()
-    max_val = df[feature].max()
+    min_val = df[[feature]].quantile(q=quantiles[0]).values[0]
+    max_val = df[[feature]].quantile(q=quantiles[1]).values[0]
 
     values = np.arange(min_val, max_val, (max_val - min_val)* 0.01)
+
+    qtls = {}
+    for i in np.arange(0.1,1.0,0.1):
+        qtls[np.round(i,1)] = df[[feature]].quantile(q=i).values[0]
 
     li = []
     va = []
@@ -24,6 +34,7 @@ def make_pdp(df, feature, model, type='classification'):
     if type=='classification':
         for i in values:
             _df = df.copy()
+
             _df[feature].values[:] = i
 
             output = model.predict_proba(_df)[:, 1]
@@ -41,6 +52,7 @@ def make_pdp(df, feature, model, type='classification'):
     elif type=='regression':
         for i in values:
             _df = df.copy()
+
             _df[feature].values[:] = i
 
             output = model.predict(_df)
@@ -50,10 +62,10 @@ def make_pdp(df, feature, model, type='classification'):
             li.append(avg_output)
             va.append(i)
 
-    return va, li
+    return va, li, qtls
 
 
-def plot_pdp(feature, va, li, type='classification'):
+def plot_pdp(feature, va, li, type='classification', quantiles = None, norm=False, axs = None, **kwargs):
 
     """
     Plot a partial dependency plot
@@ -61,21 +73,37 @@ def plot_pdp(feature, va, li, type='classification'):
     :param va: array
     :param li: array
     :param type: string
+    :param quantiles: list of quantile values to plot
+    :param norm: boolean. to normalise data so mean value = 0
+    :param axs: matplotlib axis if using one from a preexisting plot
+    :param **kwargs: other keywords
     """
+
     sns.set_style("whitegrid")
 
-    fig = plt.figure(figsize=(7,7))
+    if axs == None:
+        fig, axs = plt.subplots(1, 1, figsize=(7,7))
 
-    plt.plot(va,li,c='k', zorder=1, linestyle='-' )
-    if type=='classification':
-        plt.plot([min(va), max(va)],[0.,0.], linestyle='--')
-    plt.ylabel("Partial Dependence", fontsize=16)
-    plt.xlabel(feature, fontsize=16)
+    if norm == True:
+        li=np.array(li)
+        li-=li.mean()
 
-    props = dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9)
+    axs.plot(va,li,c='k', zorder=1, linestyle='-' )
 
-    plt.gca().tick_params(axis='both', which='major', labelsize=15)
-    plt.gca().tick_params(axis='both', which='minor', labelsize=15)
+    axs.set_xlim(kwargs.get("xmin", None), kwargs.get("xmax", None))
+    axs.set_ylim(kwargs.get("ymin", None), kwargs.get("ymax", None))
+    axs.set_xlabel(kwargs.get("xlabel",feature), fontsize=kwargs.get("label_fontsize",16))
+    axs.set_ylabel(kwargs.get("ylabel","Partial Dependence"), fontsize=kwargs.get("label_fontsize",16))
+    axs.set_title(kwargs.get("title","Partial Dependency Plot"), fontsize=kwargs.get("title_fontsize",18))
+    axs.tick_params(axis='both', which='major', labelsize=kwargs.get("major_tick_fontsize",15))
+    axs.tick_params(axis='both', which='minor', labelsize=kwargs.get("minor_tick_fontsize",15))
 
-    plt.title("Partial Dependency Plot", fontsize=18)
-    plt.show()
+    if quantiles is not None:
+        for q in quantiles.keys():
+            axs.axvline(quantiles[q], 0, 0.05)
+
+
+    try:
+        return fig, axs
+    except:
+        return axs
