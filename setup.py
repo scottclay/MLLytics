@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '0.1.17'
+VERSION = '0.2.0'
 
 CLASSIFIERS = ['Intended Audience :: Science/Research',
 			   'Intended Audience :: Developers',
@@ -23,7 +23,7 @@ setup(
     description='A library of tools for easier evaluation of ML models.',
 	long_description=open('README.md').read(),
 	long_description_content_type='text/markdown',
-	install_requires=['numpy >= 1.14.3', 'matplotlib >= 2.2.2', 'seaborn >= 0.8.1', 'pandas >= 0.23.0',
+	install_requires=['numpy >= 1.14.3', 'matplotlib >= 3.0', 'seaborn >= 0.8.1', 'pandas >= 0.23.0',
 					'scikit-learn >= 0.19.1'],
     zip_safe=False,
 	classifiers = CLASSIFIERS
