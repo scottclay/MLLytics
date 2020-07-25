@@ -386,7 +386,6 @@ def plot_roc_auc_cv(folds: list, label='Fold', plot_averages = True):
 
     mean_tpr = np.mean(tprs, axis=0)
     mean_tpr[-1] = 1.0
-    #mean_auc = auc(mean_fpr, mean_tpr)
 
     plt.plot([-0.2,1.2],[-0.2,1.2], zorder=1, linestyle='--', color='k')
     plt.xlim([-0.05,1.05])
@@ -399,12 +398,8 @@ def plot_roc_auc_cv(folds: list, label='Fold', plot_averages = True):
     tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
     tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
 
-
-    #print(_auc)
     mean_auc = np.mean(np.array(_auc))
     std_auc = np.std(np.array(_auc))
-
-
 
     for i in range(0,k):
 
@@ -415,9 +410,6 @@ def plot_roc_auc_cv(folds: list, label='Fold', plot_averages = True):
 	    plt.plot(mean_fpr, mean_tpr, color='k', linewidth=2, label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc))
 	    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
 			label=r'$\pm$ 1 std. dev.')
-
-
-
 
     plt.legend(fontsize = 12)
 
@@ -443,12 +435,8 @@ def plot_recall_precision_cv(folds: list, label='Fold', plot_averages = True):
 
     for i in range(0,k):
         pres.append(interp(mean_recalls,folds[i].recall[::-1], folds[i].prec[::-1]))
-        #pres[-1][0] = 0.0
-        #_auc=np.append(_auc, auc(folds[i].fpr, folds[i].tpr))
 
     mean_prec = np.mean(pres, axis=0)
-    #mean_prec[-1] = 1.0
-    #mean_auc = auc(mean_fpr, mean_tpr)
 
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.05,1.05])
@@ -460,11 +448,6 @@ def plot_recall_precision_cv(folds: list, label='Fold', plot_averages = True):
     std_prec = np.std(pres, axis=0)
     prec_upper = np.minimum(mean_prec + std_prec, 1)
     prec_lower = np.maximum(mean_prec - std_prec, 0)
-
-
-    #print(_auc)
-    #mean_auc = np.mean(np.array(_auc))
-    #std_auc = np.std(np.array(_auc))
 
     for i in range(0,k):
         plt.plot(folds[i].recall,folds[i].prec, zorder=1, linestyle='-',label=label+r' %d'%(i))
@@ -478,7 +461,3 @@ def plot_recall_precision_cv(folds: list, label='Fold', plot_averages = True):
 
     plt.gca().tick_params(axis='both', which='major', labelsize=14)
     plt.gca().tick_params(axis='both', which='minor', labelsize=14)
-
-
-        #plt.scatter(folds[i].fpr,folds[i].tpr, cmap = cm.viridis, edgecolors='k',
-        #            linewidth=1.5, marker='o',linestyle='-',zorder=2 )

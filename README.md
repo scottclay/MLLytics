@@ -15,12 +15,17 @@ Upload package
 
 ## Future
 ### Improvements and cleanup
-* Allow figure size and font sizes to be passed into plotting functions
 * Comment all functions and classes
 * Add type hinting to all functions and classes (https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html)
-* Example guides for each function in jupyter notebooks
-* ~MultiClassMetrics should inherit from ClassMetrics~
-* REGRESSION
+* Scoring functions
+* More output stats in overviews
+* Update reliability plot https://machinelearningmastery.com/calibrated-classification-model-in-scikit-learn/
+* Tests
+* Switch from my metrics to sklearn metrics where it makes sense? aka
+```fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])```
+and more general macro/micro average metrics from: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html#sklearn.metrics.recall_score
+* Additional metrics (sensitivity, specificity, precision, negative predictive value, FPR, FNR,
+false discovery rate, accuracy, F1 score
 
 ### Cosmetic
 * Fix size of confusion matrix
@@ -31,20 +36,11 @@ Upload package
 * Tidy up cross validation and plots (also repeated cross-validation)
 * Acc-thresholds graph
 
-
-
-### Big push
-* Scoring functions
-* MultiClassMetrics class to inherit from ClassMetrics and share common functions
-* More output stats in overviews
-* Update reliability plot https://machinelearningmastery.com/calibrated-classification-model-in-scikit-learn/
-* Tests
-* Switch from my metrics to sklearn metrics where it makes sense? aka
-```fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])```
-and more general macro/micro average metrics from: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html#sklearn.metrics.recall_score
-* Additional metrics (sensitivity, specificity, precision, negative predictive value, FPR, FNR,
-false discovery rate, accuracy, F1 score
-
+### Recently completed
+* ~Allow figure size and font sizes to be passed into plotting functions~
+* ~Example guides for each function in jupyter notebooks~
+* ~MultiClassMetrics class to inherit from ClassMetrics and share common functions~
+* ~REGRESSION~
 
 ## Contributing Authors
 * Scott Clay
