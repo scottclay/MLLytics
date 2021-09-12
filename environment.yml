@@ -90,6 +90,5 @@ dependencies:
   - zeromq=4.3.2=h6de7cb9_2
   - zlib=1.2.11=h1de35cc_3
   - pip:
-    - mllytics==0.1.12
+    - mllytics==0.2.0
 prefix: /Users/scl03/anaconda3/envs/MLLytics
-
