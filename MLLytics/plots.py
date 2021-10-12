@@ -5,7 +5,7 @@ import seaborn as sns
 import itertools
 from sklearn.metrics import confusion_matrix
 
-from MLLytics import cluster_correlation_matrix
+from MLLytics import cluster_correlation_matrix, ftr_importance
 from matplotlib import cm
 
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
