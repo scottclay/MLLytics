@@ -7,12 +7,6 @@ or
 or
 ``` conda env create -f environment.yml```
 
-## Update pypi instructions (for me)
-Creates the package
-```python setup.py sdist bdist_wheel```
-Upload package
-```twine upload --repository pypi *version_files*```
-
 ## Future
 ### Improvements and cleanup
 * Comment all functions and classes
