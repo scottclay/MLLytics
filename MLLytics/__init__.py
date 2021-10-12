@@ -204,10 +204,10 @@ class MultiClassMetrics(ClassMetrics):
 
 
             #both macro A and B
-            self.precision = np.append(self.precision, _prec_macroA)
-            self.recall = np.append(self.recall, _recall_macroA)
-            self.tpr = np.append(self.tpr, _tpr_macroA)
-            self.fpr = np.append(self.fpr, _fpr_macroA)
+            self.precision = np.append(self.precision, _prec)
+            self.recall = np.append(self.recall, _recall)
+            self.tpr = np.append(self.tpr, _tpr)
+            self.fpr = np.append(self.fpr, _fpr)
 
 
 def ftr_importance(cols, imps):
