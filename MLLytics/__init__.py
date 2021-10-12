@@ -248,7 +248,7 @@ def corr_with_label(df, label, method='pearson'):
     """
     Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
 	You can calculate a correlation matrix by calling .corr().
-	You can calculate a correlation matrix for a spark dataframe by calling MLLytics.spark.spark_corr_matrix
+	You can calculate a correlation matrix for a spark dataframe by calling SparkLytics.corr_matrix
     :param df: Pandas dataframe of all columns you wish to compare with the label
 	:param label: Column to compare correlations with
 	:param method: Correlation technique to pass to pd.corr()
@@ -268,13 +268,12 @@ def cluster_correlation_matrix(corr: pd.DataFrame):
     """
     Computes clustered correlation matrix for a confusion matrix held in a pandas DataFrame.
 	You can calculate a correlation matrix by calling .corr().
-	You can calculate a correlation matrix for a spark dataframe by calling MLLytics.spark.spark_corr_matrix
+	You can calculate a correlation matrix for a spark dataframe by calling SparkLytics.spark_corr_matrix
 
     :param df: Pandas dataframe of correlation matrix
     :return: Tuple containing dict of features with cluster assignment and correlation matrix ordered in the same way
     """
     # Compute correlation matrix and taks abs value
-    #corr: pd.DataFrame = spark_corr_matrix(df)
     abs_corr = corr.abs()
 
     # Use AffinityPropagation to cluster data
