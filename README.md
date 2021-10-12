@@ -1,4 +1,4 @@
-[![Upload Python Package](https://github.com/scottclay/MLLytics/actions/workflows/python-publish.yml/badge.svg)](https://github.com/scottclay/MLLytics/actions/workflows/python-publish.yml)
+[![Syntax and Tests](https://github.com/scottclay/MLLytics/actions/workflows/python-package.yml/badge.svg?branch=master)](https://github.com/scottclay/MLLytics/actions/workflows/python-package.yml) [![Upload Python Package](https://github.com/scottclay/MLLytics/actions/workflows/python-publish.yml/badge.svg)](https://github.com/scottclay/MLLytics/actions/workflows/python-publish.yml) 
 
 # MLLytics
 
